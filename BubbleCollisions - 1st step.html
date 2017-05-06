@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<!------分------割------线------>
+<head>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="Author" content="Bruce Zhu">
+    <title>Bubble Collisions - 泡泡碰撞</title>
+
+</head>
+
+<style>
+
+	html,body {
+	    margin: 0;
+	    padding: 0;
+	}
+	canvas {
+	    box-shadow: 0 0 40px black;
+	    margin: 50px auto;
+	}
+
+</style>
+<!------分------割------线------>
+<body>
+
+	<div style="width: 800px;height: 600px;margin: 0 auto">
+
+		<canvas id="ball" class="ball" width="800px" height="600px">对不起！您的浏览器不支持Canvas</canvas>
+
+	</div>
+
+</body>
+
+<script type="text/javascript">
+
+	// 获取画布对象
+	var canvas = document.getElementById('ball');
+	var ctx = canvas.getContext('2d');
+
+
+	// 蓝色泡泡的图片
+	var blueBubbleImg = new Image();
+	blueBubbleImg.src = "蓝泡.png";
+
+
+	// 红色泡泡的图片
+	var redBubbleImg = new Image();
+	redBubbleImg.src = "红泡.png";
+
+
+	// 创建泡泡对象
+	var bubble = function(x, y, bubbleWidth, bubbleHeight, whichBubble) {
+		this.x = x;
+		this.y = y;
+		this.bubbleWidth = bubbleWidth;
+		this.bubbleHeight = bubbleHeight;
+		this.whichBubble = whichBubble;
+		this.draw = function () {
+			// 保存当前环境状态
+			ctx.save();
+			ctx.drawImage(this.whichBubble, this.x, this.y, this.bubbleWidth, this.bubbleHeight);
+		}
+	}
+
+
+	// 实例化红色泡泡对象
+	var redBubble = new bubble(centerX, centerY, 50, 50, redBubbleImg);
+
+
+	// 初始化小球出现的位置 PS：这两个声明不能放在实例化对象之前，会报错
+	var centerX = (canvas.width - redBubble.bubbleWidth)/2;
+	var centerY = (canvas.height - redBubble.bubbleHeight)/2;
+
+
+	// 在画布上绘制初始状态的泡泡
+	redBubbleImg.onload = function () {
+		redBubble.draw();
+	}
+
+
+	// 给画布设置监听事件，触发阶段默认为false冒泡阶段
+	canvas.addEventListener("mousemove", onMouseMove, false);
+
+
+	// 记录鼠标移动到的位置，初始化的值为正中心
+	var mouseX = centerX;
+	var mouseY = centerY;
+	function onMouseMove(evt){
+		// offset获取到canvas层中鼠标的位置，然后减去红色泡泡自身高度
+	    mouseX = evt.offsetX - redBubble.bubbleWidth/2;
+	    mouseY = evt.offsetY - redBubble.bubbleHeight/2;
+	}
+
+
+	// 刷新泡泡
+	function drawBubble() {
+		// 清空画布
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		// 重绘红球
+		redBubble.x = mouseX;
+		redBubble.y = mouseY;
+		redBubble.draw();
+	}
+
+
+	// 判断红泡泡是否触壁
+	
+
+
+
+	// 设置刷新时间，60帧/s的帧率是比较细腻的，所以用1s/60
+	setInterval(drawBubble, 1000/60);
+
+</script>
+<!------分------割------线------>
+</html>
