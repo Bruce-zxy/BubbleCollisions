@@ -61,6 +61,8 @@
 		this.x = x;
 		this.y = y;
 		this.r = bubbleHeight/2;
+		this.speedX;
+		this.speedY;
 		this.bubbleWidth = bubbleWidth;
 		this.bubbleHeight = bubbleHeight;
 		this.whichBubble = whichBubble;
@@ -68,6 +70,18 @@
 			// 保存当前环境状态
 			ctx.save();
 			ctx.drawImage(this.whichBubble, this.x, this.y, this.bubbleWidth, this.bubbleHeight);
+		}
+		this.move = function() {
+		    this.x += this.speedX;
+		    this.y += this.speedY;
+		    if(this.x < 0 || this.x > canvas.width - this.r*2) {
+		        this.speedX = -this.speedX;
+		    }
+		    if(this.y < 0 || this.y > canvas.height - this.r*2) {
+		        this.speedY = -this.speedY;
+		    }
+		    // 调用draw方法重绘
+		    this.draw();
 		}
 	}
 
@@ -103,12 +117,18 @@
 		// 初始化蓝色泡泡出现的位置
 		let randomX = blueRandom(0, canvas.width - blueBubbleWidth);
 		let randomY = blueRandom(0, canvas.height - blueBubbleHeight);
+		// 初始化蓝色泡泡的速度
+		let blueVx = blueRandom(0, 2);
+		let blueVy = blueRandom(0, 2);
 		// 如果将会碰壁，舍弃掉
 		if(blueBubbleCover(randomX, randomY, blueBubbleWidth, blueBubbleHeight)){
 			i--;
 			continue;
 		}
+		// 这才是真的实例化对象  = =!
 	    blueBubbles[i] = new bubble(randomX, randomY, blueBubbleWidth, blueBubbleHeight, blueBubbleImg);
+	    blueBubbles[i].speedX = blueVx;
+	    blueBubbles[i].speedY = blueVy;
 	}
 	// 在画布上绘制初始状态的泡泡
 	blueBubbleImg.onload = function () {
@@ -121,6 +141,7 @@
 		for (let i = 1; i <= blueBubblesNum; i++) {
 		 	if (blueBubbles.hasOwnProperty(i)) {
 		 		blueBubbles[i].draw();
+		 		blueBubbles[i].move();
 		 	}
 		 }
 	}
@@ -156,6 +177,19 @@
 	}
 
 
+	// 碰撞函数
+	function Crash(obj1, obj2) {
+	    let x = obj1.x - obj2.x;
+	    let y = obj1.y - obj2.y;
+	    let distance = Math.sqrt(x*x + y*y);
+	    // 判断是否与红球发生碰撞
+	    if(distance < obj1.r + obj2.r) {
+	        obj2.speedX = -obj2.speedX;
+	        obj2.speedY = -obj2.speedY;
+	    }
+	}
+
+
 	// 给画布设置监听事件，触发阶段默认为false冒泡阶段
 	canvas.addEventListener("mousemove", onMouseMove, false);
 
@@ -184,6 +218,9 @@
 			// 暂时保存这一状态的泡泡坐标，如果碰壁的话，此处不执行
 			mouseTouchBorderX = mouseX;
 			mouseTouchBorderY = mouseY;
+		}
+		for (let i = 1; i <= blueBubblesNum; i++) {
+			Crash(redBubble, blueBubbles[i]);
 		}
 		// 重新绘制
 		redBubble.draw();
